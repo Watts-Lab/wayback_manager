@@ -1,4 +1,4 @@
-from base import PublisherScraper
+from .base import PublisherScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 
