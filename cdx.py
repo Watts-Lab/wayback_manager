@@ -50,6 +50,7 @@ class WaybackCDX:
         reference_times = intervals(period_start, period_end, hrs=hrs)
         storage_collection = df['datetime'].copy(deep=True)
         target_times = set()
+        #TODO: This really shouldn't take this long...
         for time in tqdm(list(reference_times)):
             storage_collection = storage_collection[storage_collection >= time]
             target_times.add(min(storage_collection))
