@@ -56,7 +56,6 @@ class WaybackCDX:
         return df[df['datetime'].isin(target_times)]
 
 
-
 if __name__ == '__main__':
     scr = WaybackCDX()
     print(scr.get_intervals('www.nytimes.com', hrs=1, period_start=datetime.datetime(2020, 1, 1),
