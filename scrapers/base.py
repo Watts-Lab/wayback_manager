@@ -14,6 +14,7 @@ from urllib.parse import urljoin, urlparse
 from waybackpy.exceptions import WaybackError
 
 
+
 class PublisherScraper:
 
     def __init__(self, verbose = False):
@@ -23,6 +24,7 @@ class PublisherScraper:
     @property
     def front_page_url(self):
         raise NotImplementedError()
+
 
     def clean_wayback_url(self, url, remove_params = True):
         """Return a url cleaned with various wayback machine prefix and suffixes"""
@@ -89,15 +91,10 @@ class PublisherScraper:
                     return None, None
 
         try:
-            front_page = archive_near.get()
+            front_page = requests.get(archive_near.archive_url).text
+
         except UnicodeDecodeError:  # Our web parser throws this if the wayback machine doesn't have that webpage.
-            # Have it retry with scrapes from a day into the future, then give up after 5 days.
-            if date_retry < 5:
-                if self.verbose:
-                    print('Something went wrong with that date, retrying 10000 seconds into the future.')
-                return self.get_wayback_url(url, dt.datetime.fromtimestamp(timestamp.timestamp() + 10000),
-                                            date_retry=date_retry + 1, max_retries=max_retries, max_backoff=max_backoff)
-            front_page = requests.get(url).text
+            return None, None
 
         return front_page, archive_near
 

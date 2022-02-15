@@ -6,6 +6,7 @@ import datetime
 import pickle
 import os
 from tqdm import tqdm
+import requests
 
 HERE = os.path.dirname(__file__)
 config = configparser.ConfigParser()
@@ -22,10 +23,20 @@ if __name__ == '__main__':
         os.mkdir('/home/coen/Remote/Data/Wayback')
     if not os.path.exists('/home/coen/Remote/Data/Wayback/nytimes'):
         os.mkdir('/home/coen/Remote/Data/Wayback/nytimes')
+    if not os.path.exists('/home/coen/Remote/Data/Wayback/nytimes/raw'):
+        os.mkdir('/home/coen/Remote/Data/Wayback/nytimes/raw')
 
     tqdm.write('Downloading data...')
 
     for timestamp in tqdm(intervals['timestamp']):
-        article = scraper.scrape_article('www.nytimes.com', datetime.datetime.strptime(timestamp, WAYBACK_FORMAT))
-        with open(f'/home/coen/Remote/Data/Wayback/nytimes/{timestamp}.pkl', 'wb') as f:
-            pickle.dump(article, f)
+        r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
+        html = r.text
+        try:
+            article_metadata = scraper.get_top_article_metadata(html)
+            with open(f'/home/coen/Remote/Data/Wayback/nytimes/{timestamp}.pkl', 'wb') as f:
+                pickle.dump(article_metadata, f)
+            with open(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl', 'wb') as f:
+                pickle.dump(html, f)
+        except AttributeError:
+            with open(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl', 'wb') as f:
+                pickle.dump(html, f)

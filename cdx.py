@@ -48,12 +48,12 @@ class WaybackCDX:
         else:
             df = self.download_all(url)
         reference_times = intervals(period_start, period_end, hrs=hrs)
-        storage_collection = df['datetime'].copy(deep=True)
+        storage_collection = df['datetime'].copy(deep=True).sort_values()
         target_times = set()
         #TODO: This really shouldn't take this long...
         for time in tqdm(list(reference_times)):
             storage_collection = storage_collection[storage_collection >= time]
-            target_times.add(min(storage_collection))
+            target_times.add(storage_collection.iloc[0])
         return df[df['datetime'].isin(target_times)]
 
 
