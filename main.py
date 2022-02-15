@@ -1,7 +1,7 @@
 import configparser
 import os
 from scrapers.nytimes import NYTimesScraper
-from cdx import WaybackCDX
+from cdx import WaybackCDX, WAYBACK_FORMAT
 import datetime
 import pickle
 import os
@@ -26,6 +26,6 @@ if __name__ == '__main__':
     tqdm.write('Downloading data...')
 
     for timestamp in tqdm(intervals['timestamp']):
-        article = scraper.scrape_article('www.nytimes.com', timestamp)
+        article = scraper.scrape_article('www.nytimes.com', datetime.datetime.strptime(timestamp, WAYBACK_FORMAT))
         with open(f'/home/coen/Remote/Data/Wayback/nytimes/{timestamp}.pkl', 'wb') as f:
             pickle.dump(article, f)
