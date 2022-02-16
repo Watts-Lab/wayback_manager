@@ -1,5 +1,5 @@
 import configparser
-import os
+import time
 from scrapers.nytimes import NYTimesScraper
 from cdx import WaybackCDX, WAYBACK_FORMAT
 import datetime
@@ -29,7 +29,13 @@ if __name__ == '__main__':
     tqdm.write('Downloading data...')
 
     for timestamp in tqdm(intervals['timestamp']):
-        r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
+        if os.path.exists(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl'):
+            continue
+        try:
+            r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
+        except requests.exceptions.ConnectionError:
+            time.sleep(60)
+            r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
         html = r.text
         try:
             article_metadata = scraper.get_top_article_metadata(html)
