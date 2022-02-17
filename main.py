@@ -12,6 +12,20 @@ HERE = os.path.dirname(__file__)
 config = configparser.ConfigParser()
 config.read(os.path.join(HERE, 'config.ini'))
 
+
+def get_request(timestamp):
+    try:
+        r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
+    except requests.exceptions.ConnectionError:
+        time.sleep(60)
+        r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
+    except requests.exceptions.TooManyRedirects:
+        new_timestamp_i = intervals.set_index('timestamp').index.get_loc(timestamp) + 1
+        new_timestamp = intervals['timestamp'].iloc[new_timestamp_i]
+        return get_request(new_timestamp)
+    return r
+
+
 if __name__ == '__main__':
     cdxer = WaybackCDX()
     scraper = NYTimesScraper()
@@ -31,15 +45,7 @@ if __name__ == '__main__':
     for timestamp in tqdm(intervals['timestamp'][intervals['is_target']]):
         if os.path.exists(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl'):
             continue
-        try:
-            r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
-        except requests.exceptions.ConnectionError:
-            time.sleep(60)
-            r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.nytimes.com/')
-        except requests.exceptions.TooManyRedirects:
-            new_timestamp_i = intervals.set_index('timestamp').index.get_loc(timestamp) + 1
-            new_timestamp = intervals['timestamp'].iloc[new_timestamp_i]
-            r = requests.get(f'https://web.archive.org/web/{new_timestamp}/https://www.nytimes.com/')
+        r = get_request(timestamp)
         html = r.text
         try:
             article_metadata = scraper.get_top_article_metadata(html)
