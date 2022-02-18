@@ -1,8 +1,7 @@
 from base import PublisherScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import has_substr
-
+from .utils import has_substr
 
 
 class WSJScraper(PublisherScraper):
@@ -34,8 +33,6 @@ class WSJScraper(PublisherScraper):
             # Skip over blogs (and crosswords are also on "blogs." second level.
             if href_url.startswith("https://blogs."):
                 continue
-
-
 
             # Gets headline and subheading
             headline = headline_tag.get_text(separator=' \n ', strip=True)
