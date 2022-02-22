@@ -30,7 +30,7 @@ if __name__ == '__main__':
     cdxer = WaybackCDX()
     scraper = WSJScraper()
     tqdm.write('Acquiring CDX data')
-    intervals = cdxer.get_intervals('www.wsj.com', hrs=1, period_start=datetime.datetime(2020, 1, 1),
+    intervals = cdxer.get_intervals('www.wsj.com', hrs=24, period_start=datetime.datetime(2020, 1, 1, 18, 0, 0),
                                     period_end=datetime.datetime(2020, 12, 31, 23, 59, 59))
 
     if not os.path.exists('/home/coen/Remote/Data/Wayback'):
@@ -39,6 +39,8 @@ if __name__ == '__main__':
         os.mkdir('/home/coen/Remote/Data/Wayback/wsj')
     if not os.path.exists('/home/coen/Remote/Data/Wayback/wsj/raw'):
         os.mkdir('/home/coen/Remote/Data/Wayback/wsj/raw')
+    if not os.path.exists('/home/coen/Remote/Data/Wayback/wsj/articles'):
+        os.mkdir('/home/coen/Remote/Data/Wayback/wsj/articles')
 
     tqdm.write('Downloading data...')
 
@@ -53,6 +55,11 @@ if __name__ == '__main__':
                 pickle.dump(article_metadata, f)
             with open(f'/home/coen/Remote/Data/Wayback/wsj/raw/{timestamp}.pkl', 'wb') as f:
                 pickle.dump(html, f)
+            for article in article_metadata:
+                art_dump = scraper.extract(timestamp)
+                with open(f'/home/coen/Remote/Data/Wayback/wsj/articles/{timestamp}.pkl', 'wb') as f:
+                    pickle.dump(art_dump, f)
+
         except AttributeError:
             with open(f'/home/coen/Remote/Data/Wayback/wsj/raw/{timestamp}.pkl', 'wb') as f:
                 pickle.dump(html, f)
