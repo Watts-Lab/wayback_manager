@@ -60,5 +60,5 @@ class WaybackCDX:
 
 if __name__ == '__main__':
     scr = WaybackCDX()
-    print(scr.get_intervals('www.nytimes.com', hrs=1, period_start=datetime.datetime(2020, 1, 1),
-                            period_end=datetime.datetime(2020, 12, 31, 23, 59, 59)))
+    print(scr.get_intervals('www.nytimes.com', hrs=1, period_start=datetime.datetime(2015, 1, 1),
+                            period_end=datetime.datetime(20, 12, 31, 23, 59, 59)))
