@@ -32,6 +32,8 @@ class NYTimesScraper(PublisherScraper):
 
                 # TODO: Consider adding support for live coverage blogs, while it isn't super relevant for Ratio,
                 #  it may come up for speed of news.
+                if href_url is None:
+                    return None
 
                 if any(s in href_url for s in {'/interactive/', '/live/'}):
                     continue
