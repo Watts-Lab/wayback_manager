@@ -20,6 +20,7 @@ def get_request(timestamp):
         time.sleep(60)
         r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.wsj.com/')
     except requests.exceptions.TooManyRedirects:
+        time.sleep(60)
         new_timestamp_i = intervals.set_index('timestamp').index.get_loc(timestamp) + 1
         new_timestamp = intervals['timestamp'].iloc[new_timestamp_i]
         return get_request(new_timestamp)
