@@ -13,7 +13,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(HERE, 'config.ini'))
 
 
-def get_request(timestamp):
+def get_request(timestamp, intervals):
     try:
         r = requests.get(f'https://web.archive.org/web/{timestamp}/https://www.wsj.com/')
     except requests.exceptions.ConnectionError:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     for timestamp in tqdm(intervals['timestamp'][intervals['is_target']]):
         if os.path.exists(f'/home/coen/Remote/Data/Wayback/wsj/raw/{timestamp}.pkl'):
             continue
-        r = get_request(timestamp)
+        r = get_request(timestamp, intervals)
         html = r.text
         try:
             article_metadata = scraper.get_top_article_metadata(html)

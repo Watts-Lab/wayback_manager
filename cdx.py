@@ -55,6 +55,7 @@ class WaybackCDX:
             target_times.add(storage_collection.iloc[0])
         new_df = df.copy(deep=True)
         new_df['is_target'] = df['datetime'].isin(target_times)
+        new_df = new_df.drop_duplicates(subset='timestamp', keep='first')
         return new_df
 
 
