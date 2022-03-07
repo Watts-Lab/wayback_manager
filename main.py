@@ -23,7 +23,7 @@ def get_request(timestamp, intervals):
         time.sleep(60)
         new_timestamp_i = int(intervals.set_index('timestamp').index.get_loc(timestamp)) + 1
         new_timestamp = intervals['timestamp'].iloc[new_timestamp_i]
-        return get_request(new_timestamp)
+        return get_request(new_timestamp, intervals)
     return r
 
 
