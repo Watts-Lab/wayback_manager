@@ -31,8 +31,9 @@ if __name__ == '__main__':
     cdxer = WaybackCDX()
     scraper = NYTimesScraper()
     tqdm.write('Acquiring CDX data')
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
     intervals = cdxer.get_intervals('www.nytimes.com', hrs=1, period_start=datetime.datetime(2020, 1, 1),
-                                    period_end=datetime.datetime.now())
+                                    period_end=yesterday)
 
     if not os.path.exists('/home/coen/Remote/Data/Wayback'):
         os.mkdir('/home/coen/Remote/Data/Wayback')
