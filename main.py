@@ -31,7 +31,7 @@ if __name__ == '__main__':
     cdxer = WaybackCDX()
     scraper = NYTimesScraper()
     tqdm.write('Acquiring CDX data')
-    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=2)
     intervals = cdxer.get_intervals('www.nytimes.com', hrs=1, period_start=datetime.datetime(2018, 1, 1),
                                     period_end=yesterday)
 
