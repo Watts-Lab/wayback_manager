@@ -51,17 +51,5 @@ if __name__ == '__main__':
             continue
         r = get_request(timestamp, intervals)
         html = r.text
-        try:
-            article_metadata = scraper.get_top_article_metadata(html)
-            with open(f'/home/coen/Remote/Data/Wayback/nytimes/{timestamp}.pkl', 'wb') as f:
-                pickle.dump(article_metadata, f)
-            with open(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl', 'wb') as f:
-                pickle.dump(html, f)
-            # for article in article_metadata:
-            #     art_dump = scraper.extract(timestamp)
-            #     with open(f'/home/coen/Remote/Data/Wayback/nytimes/articles/{timestamp}.pkl', 'wb') as f:
-            #         pickle.dump(art_dump, f)
-
-        except AttributeError:
-            with open(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl', 'wb') as f:
-                pickle.dump(html, f)
+        with open(f'/home/coen/Remote/Data/Wayback/nytimes/raw/{timestamp}.pkl', 'wb') as f:
+            pickle.dump(html, f)
