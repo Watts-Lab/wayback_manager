@@ -52,7 +52,10 @@ class WaybackCDX:
         target_times = set()
         for time in tqdm(list(reference_times)):
             storage_collection = storage_collection[storage_collection >= time]
-            target_times.add(storage_collection.iloc[0])
+            try:
+                target_times.add(storage_collection.iloc[0])
+            except IndexError:
+                pass
         new_df = df.copy(deep=True)
         new_df['is_target'] = df['datetime'].isin(target_times)
         new_df = new_df.drop_duplicates(subset='timestamp', keep='first')

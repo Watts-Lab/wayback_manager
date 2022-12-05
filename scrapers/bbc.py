@@ -1,9 +1,9 @@
 import numpy as np
 
-from base import PublisherScraper
+from .base import PublisherScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import has_substr
+from .utils import has_substr
 
 class BBCScraper(PublisherScraper):
 
