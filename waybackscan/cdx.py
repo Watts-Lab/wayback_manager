@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import requests
 import datetime
-from utils import intervals, ref_times
+from waybackscan.utils import intervals, ref_times
 
 WAYBACK_FORMAT = '%Y%m%d%H%M%S'
 

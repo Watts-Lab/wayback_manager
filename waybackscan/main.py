@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import configparser
 import time
-from cdx import WaybackCDX, WAYBACK_FORMAT
+from waybackscan.cdx import WaybackCDX
 import datetime
 import pickle
 import os

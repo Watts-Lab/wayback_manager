@@ -1,9 +1,8 @@
 import argparse
-from cdx import WaybackCDX, WAYBACK_FORMAT
+from waybackscan.cdx import WaybackCDX
 from datetime import datetime
 import dateparser
 import sys
-from utils import pubcode
 
 
 class DateParse(argparse.Action):
