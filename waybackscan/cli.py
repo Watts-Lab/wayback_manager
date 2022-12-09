@@ -68,7 +68,7 @@ def cli():
     if args.at or args.interval:
         output[output['is_target']].to_csv(args.outfile, sep="\t")
     else:
-        output.to_csv(args.outfile, sep='\t')
+        output.to_csv(args.outfile, sep='\t', index=None)
 
 
 if __name__ == "__main__":
