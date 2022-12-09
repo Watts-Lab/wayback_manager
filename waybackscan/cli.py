@@ -66,7 +66,7 @@ def cli():
         output = cdxer.download_period(url, period_start=args.start, period_end=args.end)
 
     if args.at or args.interval:
-        output[output['is_target']].to_csv(args.outfile, sep="\t")
+        output[output['is_target']].to_csv(args.outfile, sep="\t", index=None)
     else:
         output.to_csv(args.outfile, sep='\t', index=None)
 
