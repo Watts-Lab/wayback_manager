@@ -47,6 +47,7 @@ def cli():
     freqgrp.add_argument("-i", "--interval", type=str, action=IntervalParse, nargs=1)
     freqgrp.add_argument("-a", "--at", type=str, action=TimeParse, nargs='+')
     parser.add_argument("outfile", type=argparse.FileType(), nargs="?", default=sys.stdout)
+    parser.add_argument("-f", "--fail_ok", action='store_false')
 
     args = parser.parse_args()
 
@@ -59,11 +60,11 @@ def cli():
     cdxer = WaybackCDX()
 
     if args.interval:
-        output = cdxer.get_intervals(url, hrs=args.interval, period_start=args.start, period_end=args.end)
+        output = cdxer.get_intervals(url, hrs=args.interval, period_start=args.start, period_end=args.end, filt=args.fail_ok)
     if args.at:
-        output = cdxer.get_at_time(url, at=args.at, period_start=args.start, period_end=args.end)
+        output = cdxer.get_at_time(url, at=args.at, period_start=args.start, period_end=args.end, filt=args.fail_ok)
     else:
-        output = cdxer.download_period(url, period_start=args.start, period_end=args.end)
+        output = cdxer.download_period(url, period_start=args.start, period_end=args.end, filt=args.fail_ok)
 
     if args.at or args.interval:
         output[output['is_target']].to_csv(args.outfile, sep="\t", index=None)

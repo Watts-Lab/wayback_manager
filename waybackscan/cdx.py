@@ -12,7 +12,7 @@ class WaybackCDX:
         self.cdx_format = \
             'https://web.archive.org/cdx/search/cdx?url=$URL&output=json&from=$START&to=$END'
 
-    def download_all(self, url):
+    def download_all(self, url, filt=True):
         raw_json = requests.get(
             self.cdx_format.replace('$URL', url).replace('&from=$START&to=$END', ''))
         listy_data = json.loads(raw_json.text)
@@ -20,9 +20,11 @@ class WaybackCDX:
         df = pd.DataFrame.from_records(listy_data,
                                        columns=first_line)
         df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
+        if filt:
+            df = df[df['statuscode'] == '200']
         return df
 
-    def download_period(self, url, period_start: datetime.datetime, period_end: datetime.datetime):
+    def download_period(self, url, period_start: datetime.datetime, period_end: datetime.datetime, filt=True):
         cdx_req = self.cdx_format.replace('$URL', url)
         if period_end is not None:
             period_end_wbc = period_end.strftime(WAYBACK_FORMAT)
@@ -39,13 +41,15 @@ class WaybackCDX:
         first_line = listy_data.pop(0)
         df = pd.DataFrame.from_records(listy_data, columns=first_line)
         df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
+        if filt:
+            df = df[df['statuscode'] == '200']
         return df
 
-    def get_intervals(self, url, hrs=1, period_start=None, period_end=None):
+    def get_intervals(self, url, hrs=1, period_start=None, period_end=None, filt=True):
         if period_start or period_end:
-            df = self.download_period(url, period_start, period_end)
+            df = self.download_period(url, period_start, period_end, filt=filt)
         else:
-            df = self.download_all(url)
+            df = self.download_all(url, filt=filt)
         if not period_start:
             period_start = datetime.datetime.strptime(df.timestamp.min(), WAYBACK_FORMAT)
         if not period_end:
@@ -64,11 +68,11 @@ class WaybackCDX:
         new_df = new_df.drop_duplicates(subset='timestamp', keep='first')
         return new_df
 
-    def get_at_time(self, url, at=datetime.time(hour=9), period_start=None, period_end=None):
+    def get_at_time(self, url, at=(datetime.time(hour=9)), period_start=None, period_end=None, filt=True):
         if period_start or period_end:
-            df = self.download_period(url, period_start, period_end)
+            df = self.download_period(url, period_start, period_end, filt=filt)
         else:
-            df = self.download_all(url)
+            df = self.download_all(url, filt=filt)
         if not period_start:
             period_start = df.datetime.min()
         if not period_end:

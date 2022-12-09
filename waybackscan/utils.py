@@ -18,7 +18,7 @@ def ref_times(start: datetime.datetime, end: datetime.datetime, at):
         for subtime in at:
             timei = start + timedelta(days=i)
             timei = timei.replace(hour=subtime.hour, minute=subtime.minute, second=subtime.second, microsecond=subtime.microsecond)
-        yield timei
+            yield timei
 
 
 def pubcode(url):
