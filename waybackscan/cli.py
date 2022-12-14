@@ -11,7 +11,8 @@ URL_EXCEPTIONS = {
         "abcnews": "www.abcnews.go.com",
         "npr": "www.npr.org",
         "pbs": "www.pbs.org/newshour",
-        "bbc": "www.bbc.com/news"
+        "bbc": "www.bbc.com/news",
+        "theguardian": "www.theguardian.com/us"
         }
 HERE = get_localzone()
 
