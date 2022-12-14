@@ -8,9 +8,14 @@ A collection of tools for dealing with the wayback machine. Provides the command
 pip install git+https://github.com/Watts-Lab/wayback_manager.git
 ```
 
+## A note on timezones
+
+Timezones are tricky, implicit timezones can cause hard-to-fix bugs. But for ease-of-use, the cli will assume you mean local time unless you specifically say otherwise. The parser should support most time codes.
+For timezone abbreviations, you need to provide standard and daylight information, you can't just pass Eastern/Mountain/Central/Pacific (yet). Please use standard time unless absolutely necessary.
+
 # Usage
 
-First, you must provide either a URL to scan, or a doman (assumes the url is `www.$DOMAIN.com`).
+First, you must provide either a URL to scan, or a domain (assumes the url is `www.$DOMAIN.com`).
 With no temporal options, this will scan the entire archive.
 A url can be provided with `--url` or `-u`, and a domain can be provided with `-p` or `--publisher`. 
 Publisher mode is mainly for compatibility with the News Observatory project, and for most circumstances you should use the url mode.
@@ -24,7 +29,8 @@ Or
 ```
 waybackscan -p nytimes
 ```
-This will return a TSV with ~50,000 rows, each one representing an archival post.
+
+This will return a TSV with ~260,000 rows, each one representing an archival post.
 The output TSVs have the following columns:
 |Column|Explanation|
 |------|-----------|
