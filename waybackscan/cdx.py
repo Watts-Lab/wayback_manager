@@ -3,8 +3,11 @@ import json
 import requests
 import datetime
 from waybackscan.utils import intervals, ref_times
+from tzlocal import get_localzone
+from pytz import timezone, UTC
 
 WAYBACK_FORMAT = '%Y%m%d%H%M%S'
+HERE = get_localzone()
 
 
 class WaybackCDX:
@@ -19,7 +22,7 @@ class WaybackCDX:
         first_line = listy_data.pop(0)
         df = pd.DataFrame.from_records(listy_data,
                                        columns=first_line)
-        df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
+        df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT).replace(tzinfo=UTC))
         if filt:
             df = df[df['statuscode'] == '200']
         return df
@@ -40,7 +43,7 @@ class WaybackCDX:
         listy_data = json.loads(raw_json.text)
         first_line = listy_data.pop(0)
         df = pd.DataFrame.from_records(listy_data, columns=first_line)
-        df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
+        df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT).replace(tzinfo=UTC))
         if filt:
             df = df[df['statuscode'] == '200']
         return df
@@ -51,9 +54,10 @@ class WaybackCDX:
         else:
             df = self.download_all(url, filt=filt)
         if not period_start:
-            period_start = datetime.datetime.strptime(df.timestamp.min(), WAYBACK_FORMAT)
+            # Note that I'm just minimizing the string here, this is allowed in waybackformat but is generally a bad pattern
+            period_start = datetime.datetime.strptime(df.timestamp.min(), WAYBACK_FORMAT).replace(tzinfo=UTC)
         if not period_end:
-            period_end = datetime.datetime.strptime(df.timestamp.max(), WAYBACK_FORMAT)
+            period_end = datetime.datetime.strptime(df.timestamp.max(), WAYBACK_FORMAT).replace(tzinfo=UTC)
         reference_times = intervals(period_start, period_end, hrs=hrs)
         storage_collection = df['datetime'].copy(deep=True).sort_values()
         target_times = set()
@@ -68,7 +72,7 @@ class WaybackCDX:
         new_df = new_df.drop_duplicates(subset='timestamp', keep='first')
         return new_df
 
-    def get_at_time(self, url, at=(datetime.time(hour=9)), period_start=None, period_end=None, filt=True):
+    def get_at_time(self, url, at=(datetime.time(hour=9, tzinfo=HERE)), period_start=None, period_end=None, filt=True):
         if period_start or period_end:
             df = self.download_period(url, period_start, period_end, filt=filt)
         else:

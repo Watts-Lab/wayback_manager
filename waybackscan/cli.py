@@ -1,8 +1,13 @@
+#!/usr/bin/env python
 import argparse
 from waybackscan.cdx import WaybackCDX
 from datetime import datetime
+from pytz import timezone
+from tzlocal import get_localzone
 import dateparser
 import sys
+
+HERE = get_localzone()
 
 
 class DateParse(argparse.Action):
@@ -10,7 +15,10 @@ class DateParse(argparse.Action):
         super().__init__(option_strings, dest, nargs=nargs, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, dateparser.parse(values))
+        parsed_date = dateparser.parse(values)
+        if not parsed_date.tzinfo:
+            parsed_date = parsed_date.replace(tzinfo=HERE)
+        setattr(namespace, self.dest, parsed_date)
 
 
 class TimeParse(argparse.Action):
@@ -20,7 +28,10 @@ class TimeParse(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         out = []
         for value in values:
-            out.append(dateparser.parse(value).time())
+            outdate = dateparser.parse(value)
+            if not outdate.tzinfo:
+                outdate = outdate.replace(tzinfo=HERE)
+            out.append(outdate.timetz())
         setattr(namespace, self.dest, out)
 
 
@@ -31,7 +42,11 @@ class IntervalParse(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         out = []
         for value in values:
-            out.append(round((datetime.now() - dateparser.parse(value)).total_seconds() / 3600))
+            tardate = dateparser.parse(value)
+            if not tardate.tzinfo:
+                tardate = tardate.replace(tzinfo=HERE)
+            tartz = tardate.tzinfo
+            out.append(round((datetime.now().replace(tzinfo=tartz) - tardate).total_seconds() / 3600))
         setattr(namespace, self.dest, out[0])
 
 
@@ -61,7 +76,7 @@ def cli():
 
     if args.interval:
         output = cdxer.get_intervals(url, hrs=args.interval, period_start=args.start, period_end=args.end, filt=args.fail_ok)
-    if args.at:
+    elif args.at:
         output = cdxer.get_at_time(url, at=args.at, period_start=args.start, period_end=args.end, filt=args.fail_ok)
     else:
         output = cdxer.download_period(url, period_start=args.start, period_end=args.end, filt=args.fail_ok)

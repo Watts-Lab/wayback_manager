@@ -17,7 +17,11 @@ def ref_times(start: datetime.datetime, end: datetime.datetime, at):
     for i in range((end - start).days + 1):
         for subtime in at:
             timei = start + timedelta(days=i)
-            timei = timei.replace(hour=subtime.hour, minute=subtime.minute, second=subtime.second, microsecond=subtime.microsecond)
+            if not subtime.tzinfo:
+                tz_at = HERE
+            else:
+                tz_at = subtime.tzinfo
+            timei = timei.replace(hour=subtime.hour, minute=subtime.minute, second=subtime.second, microsecond=subtime.microsecond, tzinfo=tz_at)
             yield timei
 
 
