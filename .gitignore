@@ -1,3 +1,6 @@
 .idea
 venv
 data/*
+build/
+test_waybackscan.sh
+*.egg-info
