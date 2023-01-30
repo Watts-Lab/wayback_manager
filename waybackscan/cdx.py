@@ -2,9 +2,11 @@ import pandas as pd
 import json
 import requests
 import datetime
-from waybackscan.utils import intervals, ref_times
+import time
+from .utils import intervals, ref_times
+from pytz import  UTC
 from tzlocal import get_localzone
-from pytz import timezone, UTC
+from tqdm import tqdm
 
 WAYBACK_FORMAT = '%Y%m%d%H%M%S'
 HERE = get_localzone()
@@ -14,6 +16,8 @@ class WaybackCDX:
     def __init__(self):
         self.cdx_format = \
             'https://web.archive.org/cdx/search/cdx?url=$URL&output=json&from=$START&to=$END'
+        self.closest_format = \
+            'https://web.archive.org/cdx/search/cdx?url=$URL&limit=1&closest=$TIME&sort=closest&output=json&from=$TIME'
 
     def download_all(self, url, filt=True):
         raw_json = requests.get(
@@ -48,21 +52,43 @@ class WaybackCDX:
             df = df[df['statuscode'] == '200']
         return df
 
-    def get_intervals(self, url, hrs=1, period_start=None, period_end=None, filt=True):
-        if period_start or period_end:
-            df = self.download_period(url, period_start, period_end, filt=filt)
+    def get_closest(self, url, target: datetime.datetime, retries=0, max_retries=30):
+        # https://github.com/internetarchive/wayback/issues/237#issuecomment-1042577291
+        cdx_req = self.closest_format.replace('$URL', url)
+        cdx_req = cdx_req.replace("$TIME", target.strftime(WAYBACK_FORMAT))
+        try:
+            raw_json = requests.get(cdx_req)
+        except requests.exceptions.ConnectionError as e:
+            if retries >= max_retries:
+                raise e
+            else:
+                time.sleep(5)
+                return self.get_closest(url, target, retries=retries+1)
+        try:
+            listy_data = json.loads(raw_json.text)
+        except json.decoder.JSONDecodeError as e:
+            if retries >= max_retries:
+                raise e
+            else:
+                time.sleep(5)
+                return self.get_closest(url, target, retries=retries+1)
+        first_line = listy_data.pop(0)
+        df = pd.DataFrame.from_records(listy_data, columns=first_line)
+        df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
+        return df.iloc[0]
+
+
+
+    def get_intervals(self, url, hrs=1, period_start=None, period_end=None):
+        if period_start and period_end:
+            df = self.download_period(url, period_start, period_end)
         else:
-            df = self.download_all(url, filt=filt)
-        if not period_start:
-            # Note that I'm just minimizing the string here, this is allowed in waybackformat but is generally a bad pattern
-            period_start = datetime.datetime.strptime(df.timestamp.min(), WAYBACK_FORMAT).replace(tzinfo=UTC)
-        if not period_end:
-            period_end = datetime.datetime.strptime(df.timestamp.max(), WAYBACK_FORMAT).replace(tzinfo=UTC)
+            df = self.download_all(url)
         reference_times = intervals(period_start, period_end, hrs=hrs)
         storage_collection = df['datetime'].copy(deep=True).sort_values()
         target_times = set()
-        for time in list(reference_times):
-            storage_collection = storage_collection[storage_collection >= time]
+        for time in tqdm(list(reference_times)):
+            storage_collection = storage_collection[storage_collection.to_pydatetime() >= time]
             try:
                 target_times.add(storage_collection.iloc[0])
             except IndexError:
