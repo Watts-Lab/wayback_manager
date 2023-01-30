@@ -79,11 +79,11 @@ class WaybackCDX:
 
 
 
-    def get_intervals(self, url, hrs=1, period_start=None, period_end=None):
+    def get_intervals(self, url, hrs=1, period_start=None, period_end=None, filt=True):
         if period_start and period_end:
-            df = self.download_period(url, period_start, period_end)
+            df = self.download_period(url, period_start, period_end, filt=filt)
         else:
-            df = self.download_all(url)
+            df = self.download_all(url, filt=filt)
         reference_times = intervals(period_start, period_end, hrs=hrs)
         storage_collection = df['datetime'].copy(deep=True).sort_values()
         target_times = set()
