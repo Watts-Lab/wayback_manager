@@ -6,7 +6,6 @@ import time
 from .utils import intervals, ref_times
 from pytz import  UTC
 from tzlocal import get_localzone
-from tqdm import tqdm
 
 WAYBACK_FORMAT = '%Y%m%d%H%M%S'
 HERE = get_localzone()
@@ -76,6 +75,11 @@ class WaybackCDX:
         df = pd.DataFrame.from_records(listy_data, columns=first_line)
         df['datetime'] = df['timestamp'].apply(lambda s: datetime.datetime.strptime(s, WAYBACK_FORMAT))
         return df.iloc[0]
+   
+   # def nearest_without_being_before(df: pd.DataFrame, dates: list[datetime.datetime], tol=1):
+       # delta = datetime.timedelta(hrs=tol)
+       # end = [d + delta for d in dates]
+
 
 
 
@@ -86,14 +90,16 @@ class WaybackCDX:
             df = self.download_all(url, filt=filt)
         reference_times = intervals(period_start, period_end, hrs=hrs)
         storage_collection = df['datetime'].copy(deep=True).sort_values()
+        # Trying to find a higher performing method
         target_times = set()
-        for time in tqdm(list(reference_times)):
-            storage_collection = storage_collection[storage_collection.to_pydatetime() >= time]
+        for time in list(reference_times):
+            storage_collection = storage_collection[storage_collection >= time]
             try:
                 target_times.add(storage_collection.iloc[0])
             except IndexError:
                 pass
         new_df = df.copy(deep=True)
+                
         new_df['is_target'] = df['datetime'].isin(target_times)
         new_df = new_df.drop_duplicates(subset='timestamp', keep='first')
         return new_df

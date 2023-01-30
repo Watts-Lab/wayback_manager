@@ -75,7 +75,7 @@ def cli():
     freqgrp = parser.add_mutually_exclusive_group()
     freqgrp.add_argument("-i", "--interval", type=str, action=IntervalParse, nargs=1)
     freqgrp.add_argument("-a", "--at", type=str, action=TimeParse, nargs='+')
-    parser.add_argument("outfile", type=argparse.FileType(), nargs="?", default=sys.stdout)
+    parser.add_argument("outfile", type=argparse.FileType("w"), nargs="?", default=sys.stdout)
     parser.add_argument("-f", "--fail_ok", action='store_false')
 
     args = parser.parse_args()
